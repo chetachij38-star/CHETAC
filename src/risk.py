@@ -43,3 +43,57 @@ def validate_exposure(
     exposure_percent = (position_value / account_balance) * 100
 
     return exposure_percent <= max_exposure_percent
+
+
+def calculate_stop_loss(
+    entry_price: float,
+    risk_percent: float,
+    direction: str,
+) -> float:
+    """Calculate a stop-loss price from entry price and risk percentage."""
+
+    if entry_price <= 0:
+        raise ValueError("Entry price must be greater than zero.")
+
+    if risk_percent <= 0:
+        raise ValueError("Risk percent must be greater than zero.")
+
+    if direction not in {"long", "short"}:
+        raise ValueError("Direction must be 'long' or 'short'.")
+
+    risk_amount = entry_price * (risk_percent / 100)
+
+    if direction == "long":
+        return entry_price - risk_amount
+
+    return entry_price + risk_amount
+
+
+def calculate_risk_position_size(
+    account_balance: float,
+    risk_percent: float,
+    entry_price: float,
+    stop_loss_price: float,
+) -> float:
+    """Calculate position size based on maximum account risk."""
+
+    if account_balance <= 0:
+        raise ValueError("Account balance must be greater than zero.")
+
+    if risk_percent <= 0:
+        raise ValueError("Risk percent must be greater than zero.")
+
+    if entry_price <= 0:
+        raise ValueError("Entry price must be greater than zero.")
+
+    if stop_loss_price <= 0:
+        raise ValueError("Stop-loss price must be greater than zero.")
+
+    risk_per_unit = abs(entry_price - stop_loss_price)
+
+    if risk_per_unit == 0:
+        raise ValueError("Entry and stop-loss prices must be different.")
+
+    maximum_loss = account_balance * (risk_percent / 100)
+
+    return maximum_loss / risk_per_unit
