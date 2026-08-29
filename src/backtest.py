@@ -84,3 +84,58 @@ def calculate_profit_factor(
         return float("inf") if gross_profit > 0 else 0.0
 
     return gross_profit / gross_loss
+
+
+def calculate_position_size(
+    balance: float,
+    risk_percent: float,
+    entry_price: float,
+    stop_loss_price: float,
+) -> float:
+    """Calculate units based on a fixed percentage of account risk."""
+
+    if balance <= 0:
+        raise ValueError("Balance must be greater than zero.")
+
+    if risk_percent <= 0:
+        raise ValueError("Risk percent must be greater than zero.")
+
+    if entry_price <= 0 or stop_loss_price <= 0:
+        raise ValueError("Prices must be greater than zero.")
+
+    if entry_price == stop_loss_price:
+        raise ValueError("Entry and stop-loss prices cannot be equal.")
+
+    risk_amount = balance * (risk_percent / 100)
+    stop_distance = abs(entry_price - stop_loss_price)
+
+    return risk_amount / stop_distance
+
+
+def calculate_trade_cost(
+    position_size: float,
+    entry_price: float,
+    exit_price: float,
+    fee_rate: float,
+    slippage_rate: float,
+) -> float:
+    """Calculate estimated trading costs from fees and slippage."""
+
+    if position_size <= 0:
+        raise ValueError("Position size must be greater than zero.")
+
+    if entry_price <= 0 or exit_price <= 0:
+        raise ValueError("Prices must be greater than zero.")
+
+    if fee_rate < 0:
+        raise ValueError("Fee rate cannot be negative.")
+
+    if slippage_rate < 0:
+        raise ValueError("Slippage rate cannot be negative.")
+
+    traded_value = position_size * (entry_price + exit_price)
+
+    fee_cost = traded_value * fee_rate
+    slippage_cost = traded_value * slippage_rate
+
+    return fee_cost + slippage_cost
