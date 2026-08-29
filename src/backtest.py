@@ -1,3 +1,4 @@
+from src.execution import calculate_net_trade_result
 from dataclasses import dataclass
 
 from src.market_data import Candle
@@ -247,4 +248,60 @@ def build_backtest_report(
         profit_factor=profit_factor,
         max_drawdown=max_drawdown,
         equity_curve=equity_curve,
+    )
+
+
+def run_cost_aware_backtest(
+    candles: list[Candle],
+    starting_balance: float,
+    position_size: float,
+    fee_rate: float,
+    slippage_per_unit: float,
+) -> BacktestResult:
+    """Run the strategy simulation using the execution cost model."""
+
+    if starting_balance <= 0:
+        raise ValueError("Starting balance must be greater than zero.")
+
+    if len(candles) < 2:
+        raise ValueError("At least two candles are required.")
+
+    if position_size <= 0:
+        raise ValueError("Position size must be greater than zero.")
+
+    balance = starting_balance
+    trades = 0
+
+    for previous, current in zip(candles, candles[1:]):
+        signal = generate_signal(
+            fast_price=current.close,
+            slow_price=previous.close,
+        )
+
+        if signal == Signal.BUY:
+            trade_result = calculate_net_trade_result(
+                entry_price=previous.close,
+                exit_price=current.close,
+                position_size=position_size,
+                fee_rate=fee_rate,
+                slippage_per_unit=slippage_per_unit,
+            )
+            balance += trade_result
+            trades += 1
+
+        elif signal == Signal.SELL:
+            trade_result = calculate_net_trade_result(
+                entry_price=current.close,
+                exit_price=previous.close,
+                position_size=position_size,
+                fee_rate=fee_rate,
+                slippage_per_unit=slippage_per_unit,
+            )
+            balance += trade_result
+            trades += 1
+
+    return BacktestResult(
+        starting_balance=starting_balance,
+        ending_balance=balance,
+        trades=trades,
     )
