@@ -139,3 +139,26 @@ def calculate_trade_cost(
     slippage_cost = traded_value * slippage_rate
 
     return fee_cost + slippage_cost
+
+
+def calculate_return_percent(
+    starting_balance: float,
+    ending_balance: float,
+) -> float:
+    """Calculate account return as a percentage."""
+
+    if starting_balance <= 0:
+        raise ValueError("Starting balance must be greater than zero.")
+
+    return ((ending_balance - starting_balance) / starting_balance) * 100
+
+
+def calculate_win_rate(trade_results: list[float]) -> float:
+    """Calculate the percentage of trades with positive results."""
+
+    if not trade_results:
+        return 0.0
+
+    winning_trades = sum(1 for result in trade_results if result > 0)
+
+    return (winning_trades / len(trade_results)) * 100
