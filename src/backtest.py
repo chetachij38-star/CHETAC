@@ -162,3 +162,22 @@ def calculate_win_rate(trade_results: list[float]) -> float:
     winning_trades = sum(1 for result in trade_results if result > 0)
 
     return (winning_trades / len(trade_results)) * 100
+
+
+def build_equity_curve(
+    starting_balance: float,
+    trade_results: list[float],
+) -> list[float]:
+    """Build account equity after each completed trade."""
+
+    if starting_balance <= 0:
+        raise ValueError("Starting balance must be greater than zero.")
+
+    equity_curve = [starting_balance]
+    balance = starting_balance
+
+    for result in trade_results:
+        balance += result
+        equity_curve.append(balance)
+
+    return equity_curve
