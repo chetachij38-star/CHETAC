@@ -49,3 +49,38 @@ def run_backtest(
         ending_balance=balance,
         trades=trades,
     )
+
+
+def calculate_max_drawdown(equity_curve: list[float]) -> float:
+    """Return maximum peak-to-trough decline as a percentage."""
+
+    if not equity_curve:
+        raise ValueError("Equity curve cannot be empty.")
+
+    peak = equity_curve[0]
+    max_drawdown = 0.0
+
+    for equity in equity_curve:
+        if equity > peak:
+            peak = equity
+
+        if peak > 0:
+            drawdown = ((peak - equity) / peak) * 100
+            max_drawdown = max(max_drawdown, drawdown)
+
+    return max_drawdown
+
+
+def calculate_profit_factor(
+    profits: list[float],
+    losses: list[float],
+) -> float:
+    """Return gross profits divided by absolute gross losses."""
+
+    gross_profit = sum(value for value in profits if value > 0)
+    gross_loss = abs(sum(value for value in losses if value < 0))
+
+    if gross_loss == 0:
+        return float("inf") if gross_profit > 0 else 0.0
+
+    return gross_profit / gross_loss
