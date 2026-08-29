@@ -97,3 +97,27 @@ def calculate_risk_position_size(
     maximum_loss = account_balance * (risk_percent / 100)
 
     return maximum_loss / risk_per_unit
+
+
+def check_daily_loss_limit(
+    starting_day_balance: float,
+    current_balance: float,
+    max_daily_loss_percent: float,
+) -> bool:
+    """Return whether trading may continue within the daily loss limit."""
+
+    if starting_day_balance <= 0:
+        raise ValueError("Starting day balance must be greater than zero.")
+
+    if current_balance < 0:
+        raise ValueError("Current balance cannot be negative.")
+
+    if max_daily_loss_percent <= 0:
+        raise ValueError("Maximum daily loss percent must be greater than zero.")
+
+    loss_percent = (
+        (starting_day_balance - current_balance)
+        / starting_day_balance
+    ) * 100
+
+    return loss_percent < max_daily_loss_percent
