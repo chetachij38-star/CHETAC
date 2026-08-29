@@ -181,3 +181,70 @@ def build_equity_curve(
         equity_curve.append(balance)
 
     return equity_curve
+
+
+@dataclass(frozen=True)
+class BacktestReport:
+    starting_balance: float
+    ending_balance: float
+    total_return_percent: float
+    trades: int
+    win_rate: float
+    profit_factor: float
+    max_drawdown: float
+    equity_curve: list[float]
+
+
+def build_backtest_report(
+    starting_balance: float,
+    trade_results: list[float],
+) -> BacktestReport:
+    """Build a consolidated performance report from trade results."""
+
+    if starting_balance <= 0:
+        raise ValueError("Starting balance must be greater than zero.")
+
+    equity_curve = build_equity_curve(starting_balance, trade_results)
+    ending_balance = equity_curve[-1]
+    trades = len(trade_results)
+
+    total_return_percent = (
+        (ending_balance - starting_balance) / starting_balance
+    ) * 100
+
+    winning_trades = [result for result in trade_results if result > 0]
+    losing_trades = [result for result in trade_results if result < 0]
+
+    win_rate = (
+        len(winning_trades) / trades * 100
+        if trades
+        else 0.0
+    )
+
+    gross_profit = sum(winning_trades)
+    gross_loss = abs(sum(losing_trades))
+
+    profit_factor = (
+        gross_profit / gross_loss
+        if gross_loss
+        else float("inf") if gross_profit else 0.0
+    )
+
+    peak = equity_curve[0]
+    max_drawdown = 0.0
+
+    for equity in equity_curve:
+        peak = max(peak, equity)
+        drawdown = peak - equity
+        max_drawdown = max(max_drawdown, drawdown)
+
+    return BacktestReport(
+        starting_balance=starting_balance,
+        ending_balance=ending_balance,
+        total_return_percent=total_return_percent,
+        trades=trades,
+        win_rate=win_rate,
+        profit_factor=profit_factor,
+        max_drawdown=max_drawdown,
+        equity_curve=equity_curve,
+    )
