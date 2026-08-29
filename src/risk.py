@@ -121,3 +121,28 @@ def check_daily_loss_limit(
     ) * 100
 
     return loss_percent < max_daily_loss_percent
+
+
+def risk_gate(
+    account_balance: float,
+    position_value: float,
+    max_exposure_percent: float,
+    starting_day_balance: float,
+    current_balance: float,
+    max_daily_loss_percent: float,
+) -> bool:
+    """Allow a trade only when exposure and daily-loss limits are satisfied."""
+
+    exposure_allowed = validate_exposure(
+        account_balance=account_balance,
+        position_value=position_value,
+        max_exposure_percent=max_exposure_percent,
+    )
+
+    daily_loss_allowed = check_daily_loss_limit(
+        starting_day_balance=starting_day_balance,
+        current_balance=current_balance,
+        max_daily_loss_percent=max_daily_loss_percent,
+    )
+
+    return exposure_allowed and daily_loss_allowed
