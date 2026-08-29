@@ -22,3 +22,24 @@ def calculate_position_size(
     price_distance = abs(entry_price - stop_loss_price)
 
     return risk_amount / price_distance
+
+
+def validate_exposure(
+    account_balance: float,
+    position_value: float,
+    max_exposure_percent: float,
+) -> bool:
+    """Check whether a position stays within the account exposure limit."""
+
+    if account_balance <= 0:
+        raise ValueError("Account balance must be greater than zero.")
+
+    if position_value < 0:
+        raise ValueError("Position value cannot be negative.")
+
+    if max_exposure_percent <= 0:
+        raise ValueError("Maximum exposure percent must be greater than zero.")
+
+    exposure_percent = (position_value / account_balance) * 100
+
+    return exposure_percent <= max_exposure_percent
