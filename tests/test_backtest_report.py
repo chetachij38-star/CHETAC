@@ -14,7 +14,7 @@ def test_backtest_report_contains_key_metrics():
     assert report.total_return_percent == pytest.approx(10.0)
     assert report.trades == 4
     assert report.win_rate == pytest.approx(50.0)
-    assert report.max_drawdown > 0
+    assert report.max_drawdown == pytest.approx((50 / 1100) * 100)
     assert report.equity_curve == [1000, 1100, 1050, 1125, 1100]
 
 

@@ -231,13 +231,7 @@ def build_backtest_report(
         else float("inf") if gross_profit else 0.0
     )
 
-    peak = equity_curve[0]
-    max_drawdown = 0.0
-
-    for equity in equity_curve:
-        peak = max(peak, equity)
-        drawdown = peak - equity
-        max_drawdown = max(max_drawdown, drawdown)
+    max_drawdown = calculate_max_drawdown(equity_curve)
 
     return BacktestReport(
         starting_balance=starting_balance,
