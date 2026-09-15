@@ -33,7 +33,7 @@ def run_backtest(
 
     for previous, current in zip(candles, candles[1:]):
         signal = generate_signal(
-            fast_price=current.close,
+            fast_price=current.open,
             slow_price=previous.close,
         )
 
@@ -268,7 +268,7 @@ def run_cost_aware_backtest(
 
     for previous, current in zip(candles, candles[1:]):
         signal = generate_signal(
-            fast_price=current.close,
+            fast_price=current.open,
             slow_price=previous.close,
         )
 

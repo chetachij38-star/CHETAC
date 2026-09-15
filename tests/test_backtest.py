@@ -44,3 +44,36 @@ def test_rejects_invalid_starting_balance():
 
     with pytest.raises(ValueError):
         run_backtest(candles, 0)
+
+def test_backtest_does_not_use_current_close_for_entry_signal():
+    candles = [
+        Candle(
+            timestamp=1,
+            open=100,
+            high=100,
+            low=100,
+            close=100,
+            volume=100,
+        ),
+        Candle(
+            timestamp=2,
+            open=100,
+            high=120,
+            low=100,
+            close=120,
+            volume=100,
+        ),
+        Candle(
+            timestamp=3,
+            open=120,
+            high=120,
+            low=120,
+            close=120,
+            volume=100,
+        ),
+    ]
+
+    result = run_backtest(candles, 1000)
+
+    assert result.ending_balance == 1000
+    assert result.trades == 0
