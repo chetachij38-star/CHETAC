@@ -14,7 +14,7 @@ def test_paper_trading_updates_account_balance():
         ),
         Candle(
             timestamp=2,
-            open=100,
+            open=101,
             high=106,
             low=99,
             close=105,

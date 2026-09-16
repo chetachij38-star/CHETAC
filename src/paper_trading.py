@@ -39,8 +39,7 @@ def run_paper_trading(
 
     for previous, current in zip(candles, candles[1:]):
         signal = generate_signal(
-            fast_price=current.close,
-            slow_price=previous.close,
+            fast_price=current.open,            slow_price=previous.close,
         )
 
         if signal == Signal.HOLD:
@@ -51,19 +50,19 @@ def run_paper_trading(
         stop_loss_percent = 5.0
 
         stop_loss_price = (
-            previous.close * (1 - stop_loss_percent / 100)
+            current.open * (1 - stop_loss_percent / 100)
             if direction == "long"
-            else previous.close * (1 + stop_loss_percent / 100)
+            else current.open * (1 + stop_loss_percent / 100)
         )
 
         position_size = calculate_risk_position_size(
             account_balance=balance,
             risk_percent=risk_percent,
-            entry_price=previous.close,
+            entry_price=current.open,
             stop_loss_price=stop_loss_price,
         )
 
-        position_value = position_size * previous.close
+        position_value = position_size * current.open
 
         if not risk_gate(
             account_balance=balance,
@@ -77,7 +76,7 @@ def run_paper_trading(
 
         if direction == "long":
             trade_result = calculate_net_trade_result(
-                entry_price=previous.close,
+                entry_price=current.open,
                 exit_price=current.close,
                 position_size=position_size,
                 fee_rate=fee_rate,
@@ -85,8 +84,8 @@ def run_paper_trading(
             )
         else:
             trade_result = calculate_net_trade_result(
-                entry_price=current.close,
-                exit_price=previous.close,
+                entry_price=current.open,
+                exit_price=current.close,
                 position_size=position_size,
                 fee_rate=fee_rate,
                 slippage_per_unit=slippage_per_unit,
