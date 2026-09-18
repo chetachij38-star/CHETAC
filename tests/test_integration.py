@@ -17,7 +17,7 @@ def test_end_to_end_trade_flow():
 
     current = Candle(
         timestamp=2,
-        open=100,
+        open=101,
         high=106,
         low=99,
         close=105,
@@ -25,14 +25,15 @@ def test_end_to_end_trade_flow():
     )
 
     signal = generate_signal(
-        fast_price=current.close,
+        fast_price=current.open,
         slow_price=previous.close,
     )
 
     assert signal == Signal.BUY
 
-    entry_price = previous.close
-    stop_loss_price = 95
+    entry_price = current.open
+    stop_loss_price = 95.95
+
 
     position_size = calculate_risk_position_size(
         account_balance=1000,
