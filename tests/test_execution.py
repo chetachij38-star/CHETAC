@@ -78,3 +78,14 @@ def test_rejects_negative_price():
             fee_rate=0.001,
             slippage_per_unit=0.50,
         )
+
+
+def test_rejects_slippage_that_makes_adjusted_exit_non_positive():
+    with pytest.raises(ValueError):
+        calculate_net_trade_result(
+            entry_price=100,
+            exit_price=1,
+            position_size=2,
+            fee_rate=0.001,
+            slippage_per_unit=1.50,
+        )

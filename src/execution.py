@@ -21,6 +21,8 @@ def calculate_net_trade_result(
 
     adjusted_entry = entry_price + slippage_per_unit
     adjusted_exit = exit_price - slippage_per_unit
+    if adjusted_exit <= 0:
+        raise ValueError("Adjusted exit price must be greater than zero.")
 
     gross_result = (adjusted_exit - adjusted_entry) * position_size
 
