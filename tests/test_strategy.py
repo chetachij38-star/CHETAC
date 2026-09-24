@@ -23,3 +23,8 @@ def test_rejects_invalid_prices():
 def test_rejects_negative_threshold():
     with pytest.raises(ValueError):
         generate_signal(101, 100, -0.1)
+
+
+def test_generates_buy_signal_from_completed_candle():
+    assert generate_signal(102, 100) == Signal.BUY
+
