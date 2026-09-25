@@ -127,3 +127,39 @@ def test_get_mt5_candles_rejects_failed_historical_data_request(monkeypatch):
         assert "MT5 historical data request failed" in str(exc)
     else:
         raise AssertionError("Expected RuntimeError")
+
+
+def test_get_mt5_candles_shuts_down_after_historical_data_failure(monkeypatch):
+    import src.mt5_market_data as mt5_market_data
+
+    class FakeMT5:
+        def __init__(self):
+            self.shutdown_called = False
+
+        def initialize(self):
+            return True
+
+        def copy_rates_from_pos(self, symbol, timeframe, start_pos, count):
+            return None
+
+        def last_error(self):
+            return (10002, "Historical data request failed")
+
+        def shutdown(self):
+            self.shutdown_called = True
+
+    fake_mt5 = FakeMT5()
+    monkeypatch.setattr(mt5_market_data, "mt5", fake_mt5)
+
+    try:
+        mt5_market_data.get_mt5_candles(
+            "XAUUSD.m",
+            "H1",
+            2,
+        )
+    except RuntimeError as exc:
+        assert "MT5 historical data request failed" in str(exc)
+    else:
+        raise AssertionError("Expected RuntimeError")
+
+    assert fake_mt5.shutdown_called is True
