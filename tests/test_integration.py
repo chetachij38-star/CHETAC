@@ -79,3 +79,23 @@ def test_end_to_end_trade_flow():
     )
 
     assert result.net_result > 0
+
+
+def test_mt5_candle_flows_into_candle_strategy():
+    from src.mt5_market_data import candle_from_mt5
+    from src.strategy import Signal, generate_candle_signal
+
+    raw_candle = {
+        "time": 1790100000,
+        "open": 4330.10,
+        "high": 4340.50,
+        "low": 4325.20,
+        "close": 4336.40,
+        "tick_volume": 12500,
+    }
+
+    candle = candle_from_mt5(raw_candle)
+
+    signal = generate_candle_signal(candle)
+
+    assert signal == Signal.BUY
