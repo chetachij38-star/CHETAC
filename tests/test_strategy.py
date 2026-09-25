@@ -64,3 +64,16 @@ def test_generates_hold_signal_from_small_candle():
     )
 
     assert generate_candle_signal(candle) == Signal.HOLD
+
+def test_rejects_negative_threshold_for_candle_signal():
+    candle = Candle(
+        timestamp=4,
+        open=100,
+        high=101,
+        low=99,
+        close=100.5,
+        volume=100,
+    )
+
+    with pytest.raises(ValueError):
+        generate_candle_signal(candle, -0.1)
