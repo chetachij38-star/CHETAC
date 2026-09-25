@@ -1,5 +1,5 @@
 from enum import Enum
-
+from src.market_data import Candle
 
 class Signal(Enum):
     BUY = "BUY"
@@ -21,6 +21,26 @@ def generate_signal(
         raise ValueError("Minimum difference cannot be negative.")
 
     difference_percent = ((fast_price - slow_price) / slow_price) * 100
+
+    if difference_percent >= minimum_difference_percent:
+        return Signal.BUY
+
+    if difference_percent <= -minimum_difference_percent:
+        return Signal.SELL
+
+    return Signal.HOLD
+
+
+def generate_candle_signal(
+    candle: Candle,
+    minimum_difference_percent: float = 0.1,
+) -> Signal:
+    """Generate a momentum signal from a completed candle."""
+
+    if minimum_difference_percent < 0:
+        raise ValueError("Minimum difference cannot be negative.")
+
+    difference_percent = ((candle.close - candle.open) / candle.open) * 100
 
     if difference_percent >= minimum_difference_percent:
         return Signal.BUY

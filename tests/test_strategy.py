@@ -1,6 +1,7 @@
 import pytest
 
-from src.strategy import Signal, generate_signal
+from src.market_data import Candle
+from src.strategy import Signal, generate_signal, generate_candle_signal
 
 
 def test_generates_buy_signal():
@@ -25,6 +26,41 @@ def test_rejects_negative_threshold():
         generate_signal(101, 100, -0.1)
 
 
-def test_generates_buy_signal_from_completed_candle():
-    assert generate_signal(102, 100) == Signal.BUY
 
+def test_generates_buy_signal_from_bullish_candle():
+    candle = Candle(
+        timestamp=1,
+        open=100,
+        high=103,
+        low=99,
+        close=102,
+        volume=100,
+    )
+
+    assert generate_candle_signal(candle) == Signal.BUY
+
+
+def test_generates_sell_signal_from_bearish_candle():
+    candle = Candle(
+        timestamp=2,
+        open=100,
+        high=101,
+        low=97,
+        close=98,
+        volume=100,
+    )
+
+    assert generate_candle_signal(candle) == Signal.SELL
+
+
+def test_generates_hold_signal_from_small_candle():
+    candle = Candle(
+        timestamp=3,
+        open=100,
+        high=101,
+        low=99,
+        close=100.05,
+        volume=100,
+    )
+
+    assert generate_candle_signal(candle) == Signal.HOLD
