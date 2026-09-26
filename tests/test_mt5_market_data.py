@@ -207,3 +207,24 @@ def test_get_mt5_candles_shuts_down_after_success(monkeypatch):
     assert len(candles) == 1
     assert candles[0].close == 4336.40
     assert fake_mt5.shutdown_called is True
+
+
+def test_get_mt5_candles_rejects_empty_symbol(monkeypatch):
+    import src.mt5_market_data as mt5_market_data
+
+    class FakeMT5:
+        def initialize(self):
+            raise AssertionError("MT5 initialize should not be called")
+
+    monkeypatch.setattr(mt5_market_data, "mt5", FakeMT5())
+
+    try:
+        mt5_market_data.get_mt5_candles(
+            "",
+            "H1",
+            2,
+        )
+    except ValueError as exc:
+        assert "Symbol cannot be empty." in str(exc)
+    else:
+        raise AssertionError("Expected ValueError")
