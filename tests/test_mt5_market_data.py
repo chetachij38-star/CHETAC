@@ -163,3 +163,47 @@ def test_get_mt5_candles_shuts_down_after_historical_data_failure(monkeypatch):
         raise AssertionError("Expected RuntimeError")
 
     assert fake_mt5.shutdown_called is True
+
+
+def test_get_mt5_candles_shuts_down_after_success(monkeypatch):
+    import src.mt5_market_data as mt5_market_data
+
+    class FakeMT5:
+        TIMEFRAME_H1 = "H1"
+
+        def __init__(self):
+            self.shutdown_called = False
+
+        def initialize(self):
+            return True
+
+        def copy_rates_from_pos(self, symbol, timeframe, start_pos, count):
+            return [
+                {
+                    "time": 1790100000,
+                    "open": 4330.10,
+                    "high": 4340.50,
+                    "low": 4325.20,
+                    "close": 4336.40,
+                    "tick_volume": 12500,
+                }
+            ]
+
+        def last_error(self):
+            return (1, "Success")
+
+        def shutdown(self):
+            self.shutdown_called = True
+
+    fake_mt5 = FakeMT5()
+    monkeypatch.setattr(mt5_market_data, "mt5", fake_mt5)
+
+    candles = mt5_market_data.get_mt5_candles(
+        "XAUUSD.m",
+        FakeMT5.TIMEFRAME_H1,
+        1,
+    )
+
+    assert len(candles) == 1
+    assert candles[0].close == 4336.40
+    assert fake_mt5.shutdown_called is True
