@@ -228,3 +228,24 @@ def test_get_mt5_candles_rejects_empty_symbol(monkeypatch):
         assert "Symbol cannot be empty." in str(exc)
     else:
         raise AssertionError("Expected ValueError")
+
+
+def test_get_mt5_candles_rejects_non_positive_count(monkeypatch):
+    import src.mt5_market_data as mt5_market_data
+
+    class FakeMT5:
+        def initialize(self):
+            raise AssertionError("MT5 initialize should not be called")
+
+    monkeypatch.setattr(mt5_market_data, "mt5", FakeMT5())
+
+    try:
+        mt5_market_data.get_mt5_candles(
+            "XAUUSD.m",
+            "H1",
+            0,
+        )
+    except ValueError as exc:
+        assert "Count must be greater than zero." in str(exc)
+    else:
+        raise AssertionError("Expected ValueError")
