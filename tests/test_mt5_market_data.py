@@ -56,6 +56,23 @@ def test_candle_from_mt5_rejects_negative_volume():
     else:
         raise AssertionError("Expected ValueError")
 
+def test_candle_from_mt5_rejects_negative_timestamp():
+    raw_candle = {
+        "time": -1,
+        "open": 4330.10,
+        "high": 4340.50,
+        "low": 4325.20,
+        "close": 4336.40,
+        "tick_volume": 12500,
+    }
+
+    try:
+        candle_from_mt5(raw_candle)
+    except ValueError as exc:
+        assert "Timestamp cannot be negative." in str(exc)
+    else:
+        raise AssertionError("Expected ValueError")
+
 
 
 def test_get_mt5_candles(monkeypatch):
