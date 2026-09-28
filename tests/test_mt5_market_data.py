@@ -21,6 +21,25 @@ def test_candle_from_mt5():
     assert candle.low == 4325.20
     assert candle.close == 4336.40
     assert candle.volume == 12500
+def test_candle_from_mt5_rejects_invalid_ohlc():
+    raw_candle = {
+        "time": 1790100000,
+        "open": 4330.10,
+        "high": 4320.50,
+        "low": 4315.20,
+        "close": 4318.40,
+        "tick_volume": 12500,
+    }
+
+    try:
+        candle_from_mt5(raw_candle)
+    except ValueError as exc:
+        assert "High price must be at least the open and close." in str(exc)
+    else:
+        raise AssertionError("Expected ValueError")
+
+
+
 def test_get_mt5_candles(monkeypatch):
     import src.mt5_market_data as mt5_market_data
 
