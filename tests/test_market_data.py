@@ -16,6 +16,7 @@ def test_valid_candle():
     assert candle.close == 103
     assert candle.high == 105
     assert candle.low == 95
+    assert candle.volume == 500
 
 
 def test_rejects_invalid_price():
