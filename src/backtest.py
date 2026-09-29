@@ -38,11 +38,11 @@ def run_backtest(
         )
 
         if signal == Signal.BUY:
-            balance += current.close - previous.close
+            balance += current.close - current.open
             trades += 1
 
         elif signal == Signal.SELL:
-            balance += previous.close - current.close
+            balance += current.open - current.close
             trades += 1
 
     return BacktestResult(

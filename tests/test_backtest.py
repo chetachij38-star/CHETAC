@@ -17,15 +17,15 @@ def make_candle(timestamp: int, close: float) -> Candle:
 
 def test_backtest_returns_result():
     candles = [
-        make_candle(1, 100),
-        make_candle(2, 101),
-        make_candle(3, 102),
+        Candle(timestamp=1, open=99, high=100, low=99, close=100, volume=100),
+        Candle(timestamp=2, open=101, high=102, low=100, close=102, volume=100),
+        Candle(timestamp=3, open=103, high=104, low=102, close=104, volume=100),
     ]
 
     result = run_backtest(candles, 1000)
 
     assert result.starting_balance == 1000
-    assert result.ending_balance > 1000
+    assert result.ending_balance == 1002
     assert result.trades == 2
 
 
@@ -97,26 +97,26 @@ def test_mt5_candles_feed_backtest(monkeypatch):
             return [
                 {
                     "time": 1790100000,
-                    "open": 100,
+                    "open": 99,
                     "high": 101,
-                    "low": 99,
+                    "low": 98,
                     "close": 100,
                     "tick_volume": 1000,
                 },
                 {
                     "time": 1790103600,
                     "open": 101,
-                    "high": 102,
+                    "high": 103,
                     "low": 100,
-                    "close": 101,
+                    "close": 102,
                     "tick_volume": 1100,
                 },
                 {
                     "time": 1790107200,
-                    "open": 102,
-                    "high": 103,
-                    "low": 101,
-                    "close": 102,
+                    "open": 103,
+                    "high": 105,
+                    "low": 102,
+                    "close": 104,
                     "tick_volume": 1200,
                 },
             ]
@@ -141,3 +141,28 @@ def test_mt5_candles_feed_backtest(monkeypatch):
     assert result.ending_balance == 1002
     assert result.trades == 2
 
+
+def test_backtest_enters_at_next_candle_open():
+    candles = [
+        Candle(
+            timestamp=1,
+            open=100,
+            high=110,
+            low=99,
+            close=110,
+            volume=100,
+        ),
+        Candle(
+            timestamp=2,
+            open=120,
+            high=125,
+            low=119,
+            close=125,
+            volume=100,
+        ),
+    ]
+
+    result = run_backtest(candles, 1000)
+
+    assert result.trades == 1
+    assert result.ending_balance == 1005
