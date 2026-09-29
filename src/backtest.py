@@ -2,7 +2,7 @@ from src.execution import calculate_net_trade_result
 from dataclasses import dataclass
 
 from src.market_data import Candle
-from src.strategy import Signal, generate_signal
+from src.strategy import Signal, generate_candle_signal, generate_signal
 
 
 @dataclass(frozen=True)
@@ -32,10 +32,7 @@ def run_backtest(
     trades = 0
 
     for previous, current in zip(candles, candles[1:]):
-        signal = generate_signal(
-            fast_price=current.open,
-            slow_price=previous.close,
-        )
+        signal = generate_candle_signal(previous)
 
         if signal == Signal.BUY:
             balance += current.close - current.open

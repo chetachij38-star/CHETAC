@@ -76,7 +76,7 @@ def test_backtest_does_not_use_current_close_for_entry_signal():
     result = run_backtest(candles, 1000)
 
     assert result.ending_balance == 1000
-    assert result.trades == 0
+    assert result.trades == 1
 
 
 def test_mt5_candles_feed_backtest(monkeypatch):
@@ -158,6 +158,32 @@ def test_backtest_enters_at_next_candle_open():
             high=125,
             low=119,
             close=125,
+            volume=100,
+        ),
+    ]
+
+    result = run_backtest(candles, 1000)
+
+    assert result.trades == 1
+    assert result.ending_balance == 1005
+
+
+def test_backtest_uses_previous_completed_candle_signal():
+    candles = [
+        Candle(
+            timestamp=1,
+            open=100,
+            high=103,
+            low=99,
+            close=102,
+            volume=100,
+        ),
+        Candle(
+            timestamp=2,
+            open=100,
+            high=105,
+            low=99,
+            close=105,
             volume=100,
         ),
     ]
