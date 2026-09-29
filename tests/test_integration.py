@@ -99,3 +99,87 @@ def test_mt5_candle_flows_into_candle_strategy():
     signal = generate_candle_signal(candle)
 
     assert signal == Signal.BUY
+
+
+def test_mt5_candle_flows_through_risk_and_trade_simulation():
+    from src.mt5_market_data import candle_from_mt5
+    from src.risk import calculate_stop_loss
+    from src.strategy import generate_candle_signal
+
+    signal_raw_candle = {
+        "time": 1790100000,
+        "open": 4330.10,
+        "high": 4340.50,
+        "low": 4325.20,
+        "close": 4336.40,
+        "tick_volume": 12500,
+    }
+
+    execution_raw_candle = {
+        "time": 1790103600,
+        "open": 4336.40,
+        "high": 4345.00,
+        "low": 4332.10,
+        "close": 4342.00,
+        "tick_volume": 11800,
+    }
+
+    signal_candle = candle_from_mt5(signal_raw_candle)
+    execution_candle = candle_from_mt5(execution_raw_candle)
+
+    signal = generate_candle_signal(signal_candle)
+
+    assert signal == Signal.BUY
+
+    entry_price = execution_candle.open
+
+    stop_loss_price = calculate_stop_loss(
+        entry_price=entry_price,
+        risk_percent=3.5,
+        direction="long",
+    )
+
+    position_size = calculate_risk_position_size(
+        account_balance=1000,
+        risk_percent=1,
+        entry_price=entry_price,
+        stop_loss_price=stop_loss_price,
+    )
+
+    position_value = position_size * entry_price
+
+    allowed = risk_gate(
+        account_balance=1000,
+        position_value=position_value,
+        max_exposure_percent=30,
+        starting_day_balance=1000,
+        current_balance=1000,
+        max_daily_loss_percent=5,
+    )
+
+    assert allowed is True
+
+    trade = Trade(
+        direction="long",
+        entry_price=entry_price,
+        exit_price=execution_candle.close,
+        position_size=position_size,
+    )
+
+    net_result = calculate_net_trade_result(
+        entry_price=trade.entry_price,
+        exit_price=trade.exit_price,
+        position_size=trade.position_size,
+        fee_rate=0.0001,
+        slippage_per_unit=0.01,
+    )
+
+    result = TradeResult(
+        direction=trade.direction,
+        entry_price=trade.entry_price,
+        exit_price=trade.exit_price,
+        position_size=trade.position_size,
+        net_result=net_result,
+    )
+
+    assert result.net_result > 0
