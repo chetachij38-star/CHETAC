@@ -303,3 +303,20 @@ def test_get_mt5_candles_rejects_non_positive_count(monkeypatch):
         assert "Count must be greater than zero." in str(exc)
     else:
         raise AssertionError("Expected ValueError")
+
+
+def test_candle_from_mt5_rejects_missing_volume():
+    raw_candle = {
+        "time": 1790100000,
+        "open": 4330.10,
+        "high": 4340.50,
+        "low": 4325.20,
+        "close": 4336.40,
+    }
+
+    try:
+        candle_from_mt5(raw_candle)
+    except KeyError as exc:
+        assert "tick_volume" in str(exc)
+    else:
+        raise AssertionError("Expected KeyError")
